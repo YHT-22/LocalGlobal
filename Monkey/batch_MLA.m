@@ -2,8 +2,8 @@ ccc;
 cd(fileparts(mfilename('fullpath')));
 
 tic
-MonkeyName = "Joker";
-% MonkeyName = "CM";
+% MonkeyName = "Joker";
+MonkeyName = "CM";
 protStr      = "LocalGlobal_4_4o06_Temp";
 
 % MonkeyName = "CC";

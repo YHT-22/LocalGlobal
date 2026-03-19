@@ -6,15 +6,20 @@ FigRootPath = "H:\Figure\LocalGlobal";
 
 %% load data
 DataSetName = "RawPop";
-% MonkeyName = "CC";
-% protStr = "LocalGlobal_3_3o75_TempSpec";
+MonkeyName = "CC";
+protStr = "LocalGlobal_3_3o75_TempSpec";
 
-MonkeyName = "CM";
+% MonkeyName = "CM";
 % MonkeyName = "Joker";
-protStr = "LocalGlobal_4_4o06_Temp";
+% protStr = "LocalGlobal_4_4o06_Temp";
 
 MatName = 'chSpkRes_V1.mat';
 run('MonkeyPop_loadData.m');
+
+%% Delete the cells with inconsistent trial type
+trialTypeNumberAll = rowFcn(@(x) numel(x.spkRes), chResAll);
+DeleteCellIdx = find(trialTypeNumberAll ~= max(trialTypeNumberAll));
+chResAll(DeleteCellIdx) = [];
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
@@ -22,8 +27,8 @@ if strcmp(protStr, "LocalGlobal_3_3o75_TempSpec")
     GroupIdx = {1:7, 8:14};
     ControlIdx = find(contains(trialTypes, "Control"));
 elseif strcmp(protStr, "LocalGlobal_4_4o06_Temp")
-    GroupIdx = {1:8, 9:16};
     ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
+    GroupIdx = {1:8, 9:16};
 end
 
 %% select cell
@@ -58,7 +63,7 @@ legends = cellfun(@(x) string(x{3}), stimstrtemp);
 for gIdx = 1 : numel(GroupIdx)
     subplot(1, 2, gIdx);
     plot(tPSTH, y{gIdx, 1}, 'LineWidth', 2);
-    title(strcat(groupTitles(gIdx), " (n=", num2str(numel(chResAll_sig)), ")"));
+    title(strcat(MonkeyName, " | ", groupTitles(gIdx), " (n=", num2str(numel(chResAll_sig)), ")"));
     legend(legends(GroupIdx{gIdx}), "Location", "best");
 end
 scaleAxes("x", plotWin);
@@ -66,7 +71,7 @@ scaleAxes("y", yscale);
 
 %% print figure
 print(gcf, fullfile(FigRootPath, protStr, strcat(MonkeyName, "_PSTHRawWave.jpg")), "-djpeg");
-
+close;
 
 
 
