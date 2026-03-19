@@ -1,4 +1,4 @@
-function LocalGlobalparams = MouseLA_ParseLocalGlobalParams(ProtocolStr)
+function LocalGlobalparams = LA_ParseLocalGlobalParams_TempSpec(ProtocolStr)
 
 ConfigExcelPATH = strcat(fileparts(fileparts(mfilename("fullpath"))), "\config\MouseLA_LocalGlobalConfig.xlsx");
 LocalGlobalparamsAll = table2struct(readtable(ConfigExcelPATH, "Sheet", "LocalGlobal"));

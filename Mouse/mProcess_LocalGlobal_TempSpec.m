@@ -1,4 +1,4 @@
-function mProcess_LocalGlobal_MLA(ROOTPATH, protStr, date)
+function mProcess_LocalGlobal_TempSpec(ROOTPATH, protStr, date)
 %% Load data
 baseline_Window = evalin('base', 'baseline_Window');
 
@@ -10,21 +10,21 @@ for pIndex = 1 : length(protStr)
 %         continue
 %     end
     spikeDataset             = spikeByCh(data.sortdata);
-    LocalGlobalParams               = MLA_ParseLocalGlobalParams(protStr(pIndex));
+    LocalGlobalParams               = LA_ParseLocalGlobalParams_TempSpec(protStr(pIndex));
     LocalGlobalParams.Window        = evalin('base', 'spkSelect_Window');
     try
-        trialAll{pIndex, 1}      = PassiveProcess_LocalGlobalTemp(data.epocs);
+        trialAll{pIndex, 1}      = PassiveProcess_LocalGlobalTempSpec(data.epocs);
     catch
         disp(string(date));
         break;
     end
     trialAll{pIndex, 1} (1)  = [];
-    % insertOff = [LocalGlobalParams.LocalGlobalsoundinfo(1).InsertTimeAndNum(:, 3); LocalGlobalParams.LocalGlobalsoundinfo(2).InsertTimeAndNum(:, 3)];
-    % trialAll{pIndex, 1}      = addFieldToStruct(trialAll{pIndex, 1}, num2cell([trialAll{pIndex, 1}.soundOnsetSeq]' + insertOff([trialAll{pIndex, 1}.devOrdr]')), "devOnset");
+    insertOff = [LocalGlobalParams.LocalGlobalsoundinfo(1).InsertTimeAndNum(:, 3); LocalGlobalParams.LocalGlobalsoundinfo(2).InsertTimeAndNum(:, 3)];
+    trialAll{pIndex, 1}      = addFieldToStruct(trialAll{pIndex, 1}, num2cell([trialAll{pIndex, 1}.soundOnsetSeq]' + insertOff([trialAll{pIndex, 1}.devOrdr]')), "devOnset");
     trialsSpike{pIndex, 1}   = selectSpike(spikeDataset, trialAll{pIndex, 1} , LocalGlobalParams, "trial onset");
     
     devOrdr{pIndex, 1}       = [trialAll{pIndex, 1}.devOrdr]'+(pIndex - 1)*2;
-    stimStrs{pIndex, 1}      = unique([trialAll{pIndex, 1}.trialType]');
+    stimStrs{pIndex, 1}      = LocalGlobalParams.stimStrs;
 end
 
 trialsSpike = cell2mat(trialsSpike); 
@@ -49,7 +49,7 @@ spkCH = cellfun(@(spkTrial) cellfun(@(x) spkTrial(devOrdr == x), num2cell(unique
 chSpkRes = cell2struct([
                     cellfun(@(x) char(strjoin([date, strrep(x, "CH", "ID")], "_")), string(fieldnames(trialsSpike)), "uni",false), ... % channel number
                     cellfun(@(spkDev) cell2struct([ ... % inner cell2struct
-                            cellstr(stimStrs{:}) ... % stimStr
+                            cellstr(stimStrs{:}') ... % stimStr
                             spkDev ... % trialSpike
                             cellfun(@(spkTrial, devWins) mean(calFR(spkTrial, devWins)), spkDev, num2cell(winDevResp, 2), "UniformOutput", false) ... % fring rate for winDevResp
                             cellfun(@(spkTrial, baseWins) mean(calFR(spkTrial, baseWins)), spkDev, num2cell(winBaseResp, 2), "UniformOutput", false) ... % fring rate for winBaseResp

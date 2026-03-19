@@ -12,6 +12,6 @@ temp = dir(fullfile(ROOTPATH, "LocalGlobal_3_3o75_TempSpec"));
 %%
 date = string({temp(~matches({temp.name}', [".", "..", "processedRes"])).name}');
 protStr      = ["LocalGlobal_3_3o75_TempSpec"];
-cellfun(@(x) mProcess_LocalGlobal_MouseRHD(ROOTPATH, protStr, x), date, "uni", false);
+cellfun(@(x) mProcess_LocalGlobal_TempSpec(ROOTPATH, protStr, x), date, "uni", false);
 
 toc

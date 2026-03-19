@@ -1,4 +1,4 @@
-function MSTIparams = MLA_ParseLocalGlobalParams(ProtocolStr)
+function MSTIparams = LA_ParseLocalGlobalParams_Temp(ProtocolStr)
 
 % get params
 MSTIparams.Protocol = ProtocolStr;

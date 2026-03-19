@@ -1,6 +1,6 @@
-function trialAll = PassiveProcess_LocalGlobalTempSpec_RHD(epocs)
+function trialAll = PassiveProcess_LocalGlobalTempSpec(epocs)
 %load sound wave
-SoundRootPath = 'E:\Lab members\YHT\MATLABCode\LocalGlobal\Sounds';
+SoundRootPath = 'G:\LocalGlobal\Sounds';
 SoundsInfo = [];
 [Sound1, Soundfs] = audioread(fullfile(SoundRootPath, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq1.wav'));
 Sound2 = audioread(fullfile(SoundRootPath, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq2.wav'));
