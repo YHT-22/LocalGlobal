@@ -4,7 +4,7 @@ switch DataSetName
     case "RawPop"
     % load data
     protStr      = "LocalGlobal_3_3o75_TempSpec";
-    ROOTPATH = fullfile(getRootDirPath(mfilename("fullpath"), 3), "DATA\MAT DATA\TDT\CTL_New\", protStr, "processedRes");
+    ROOTPATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "DATA\MAT DATA\TDT\CTL_New\", protStr, "processedRes");
     searchPattern = fullfile(ROOTPATH, '**', 'chSpkRes_V1.mat');
     fileList = dir(searchPattern);
     tmp = arrayfun(@(f) load(fullfile(f.folder,f.name)), fileList);

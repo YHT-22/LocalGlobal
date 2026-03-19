@@ -4,9 +4,12 @@
 %  =========================
 %% -------- load data --------
 ccc;
+protStr = "LocalGlobal_3_3o75_TempSpec";
 DataSetName = "RawPop";
-run('Mousepop_loadData.m');
-SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 3), "Figure\LocalGlobal", protStr, "Mice");
+MonkeyName = "CC";
+MatName = 'chSpkRes_V1.mat';
+run('MonkeyPop_loadData.m');
+SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr, MonkeyName);
 mkdir(SavePATH);
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
 ControlIdx = find(contains(trialTypes, "Control"));

@@ -1,4 +1,4 @@
-function mProcess_LocalGlobal_MLA(ROOTPATH, protStr, date)
+function mProcess_LocalGlobal_Temp(ROOTPATH, protStr, date)
 %% Load data
 baseline_Window = evalin('base', 'baseline_Window');
 

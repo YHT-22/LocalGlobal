@@ -1,9 +1,10 @@
 function trialAll = PassiveProcess_LocalGlobalTempSpec(epocs)
 %load sound wave
-SoundRootPath = 'G:\LocalGlobal\Sounds';
+SoundROOTPATH = evalin('base', 'SoundROOTPATH');
+% SoundROOTPATH = 'G:\LocalGlobal\Sounds';
 SoundsInfo = [];
-[Sound1, Soundfs] = audioread(fullfile(SoundRootPath, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq1.wav'));
-Sound2 = audioread(fullfile(SoundRootPath, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq2.wav'));
+[Sound1, Soundfs] = audioread(fullfile(SoundROOTPATH, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq1.wav'));
+Sound2 = audioread(fullfile(SoundROOTPATH, '2025-06-12_LocalGlobal_3_3o75_None_Int_Cor\Reg3_3o75_3_Seq2.wav'));
 % Sound3 = audioread('.\LocalGlobal\Sounds\2025-06-09_RegInsert_Freq\LocalGlobal_Frequency_f1_2000_f2_2025.wav');
 % Sound4 = audioread('.\LocalGlobal\Sounds\2025-06-09_RegInsert_Freq\LocalGlobal_Frequency_f2_2025_f1_2000.wav');
 SoundsWave = {Sound1, Sound2};
