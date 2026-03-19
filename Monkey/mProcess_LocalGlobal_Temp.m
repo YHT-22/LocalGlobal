@@ -24,7 +24,9 @@ for pIndex = 1 : length(protStr)
     trialsSpike{pIndex, 1}   = selectSpike(spikeDataset, trialAll{pIndex, 1} , LocalGlobalParams, "trial onset");
     
     devOrdr{pIndex, 1}       = [trialAll{pIndex, 1}.devOrdr]'+(pIndex - 1)*2;
-    stimStrs{pIndex, 1}      = unique([trialAll{pIndex, 1}.trialType]');
+    stimStrs{pIndex, 1}      = arrayfun(@(ordr) ...
+                                    unique([trialAll{pIndex, 1}([trialAll{pIndex, 1}.devOrdr]' == ordr).trialType]'), ...
+                                unique(devOrdr{pIndex, 1}));
 end
 
 trialsSpike = cell2mat(trialsSpike); 

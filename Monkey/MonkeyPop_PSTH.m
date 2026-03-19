@@ -1,17 +1,30 @@
 ccc;
 cd(fileparts(mfilename('fullpath')));
 
+%% save Path
+FigRootPath = "H:\Figure\LocalGlobal";
+
 %% load data
-protStr = "LocalGlobal_3_3o75_TempSpec";
 DataSetName = "RawPop";
-MonkeyName = "CC";
+% MonkeyName = "CC";
+% protStr = "LocalGlobal_3_3o75_TempSpec";
+
+MonkeyName = "CM";
+% MonkeyName = "Joker";
+protStr = "LocalGlobal_4_4o06_Temp";
+
 MatName = 'chSpkRes_V1.mat';
 run('MonkeyPop_loadData.m');
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-GroupIdx = {1:7, 8:14};
-ControlIdx = find(contains(trialTypes, "Control"));
+if strcmp(protStr, "LocalGlobal_3_3o75_TempSpec")
+    GroupIdx = {1:7, 8:14};
+    ControlIdx = find(contains(trialTypes, "Control"));
+elseif strcmp(protStr, "LocalGlobal_4_4o06_Temp")
+    GroupIdx = {1:8, 9:16};
+    ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
+end
 
 %% select cell
 sigtestRes = arrayfun(@(x) arrayfun(@(y) ttest(y.devCount, y.baseCount, "Alpha",  0.01), x.spkRes), chResAll, 'UniformOutput', false);
@@ -28,8 +41,15 @@ for gIdx = 1 : numel(GroupIdx)
 end
 
 %% plot PSTH
-yscale = [-1.5, 9.5];
-plotWin = [-100, 300];
+switch MonkeyName
+    case "CC"
+        yscale = [-1.5, 9.5];
+    case "CM"
+        yscale = [-1.5, 11];
+    case "Joker"
+        yscale = [-1.5, 9.5];
+end
+plotWin = [-100, 500];
 tPSTH = tmp(1).params.tPSTH;
 stimstrtemp = cellfun(@(x) strsplit(x, '_'), cellstr(trialTypes), 'UniformOutput', false);
 groupTitles = [unique(cellfun(@(x) string([x{1}, '-', x{2}]), stimstrtemp(GroupIdx{1}))), ...
@@ -43,6 +63,9 @@ for gIdx = 1 : numel(GroupIdx)
 end
 scaleAxes("x", plotWin);
 scaleAxes("y", yscale);
+
+%% print figure
+print(gcf, fullfile(FigRootPath, protStr, strcat(MonkeyName, "_PSTHRawWave.jpg")), "-djpeg");
 
 
 

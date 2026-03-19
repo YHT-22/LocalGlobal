@@ -32,13 +32,13 @@ for tIdx = 1 : length(trialOnset)
     Insert_Time = ICIOnsetTemp(InsertIdx(IdxTemp(1:end-1)));
     trialNum      = (tIdx - 1) * numel(Insert_Num) + (1 : numel(Insert_Num))';
     if BaseICI < InsertICI
-        trialType = cellfun(@(InNum) strcat(string(BaseICI), '_', string(InsertICI), '_Inc_N', string(InNum)), ...
+        trialType = cellfun(@(InNum) strcat(string(BaseICI), '_', string(InsertICI), '_IncN', string(InNum)), ...
                             mat2cell(Insert_Num, ones([size(Insert_Num, 1), 1])));
         for i = 1:length(Insert_Num)
             devordr(i, 1) = find(Insert_Num(i) == sort(Insert_Num));
         end
     elseif BaseICI > InsertICI
-        trialType = cellfun(@(InNum) strcat(string(BaseICI), '_', string(InsertICI), '_Dec_N', string(InNum)), ...
+        trialType = cellfun(@(InNum) strcat(string(BaseICI), '_', string(InsertICI), '_DecN', string(InNum)), ...
                             mat2cell(Insert_Num, ones([size(Insert_Num, 1), 1])));
         for i = 1:length(Insert_Num)
             devordr(i, 1) = find(Insert_Num(i) == sort(Insert_Num)) + numel(Insert_Num);
