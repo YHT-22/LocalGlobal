@@ -1,6 +1,15 @@
-function updateLocalGlobal_server
+function updateLocalGlobal_server(SyncOption, remote)
+narginchk(0, 2);
+if nargin < 1
+    SyncOption = false;
+end
+if nargin < 2
+    remote = 'internal';
+end
+mu.syncRepositories(...
+    "log", '', ...
+    "RepositoryPaths", fileparts(mfilename("fullpath")), ...
+    "SyncOption", SyncOption, ...
+    "Remote", remote);
 
-mu.syncRepositories( ...
-    "RepositoryPaths", fileparts(mfilename("fullpath")) ...
-);
 
