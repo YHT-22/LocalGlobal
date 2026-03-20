@@ -3,17 +3,15 @@
 %  Based on Poisson Latency
 %  =========================
 ccc;
-%% save Path
-FigRootPath = "G:\Figure\LocalGlobal";
 
 %% -------- load data --------
 DataSetName = "RawPop";
-MonkeyName = "CC";
-protStr = "LocalGlobal_3_3o75_TempSpec";
+% MonkeyName = "CC";
+% protStr = "LocalGlobal_3_3o75_TempSpec";
 
 % MonkeyName = "CM";
-% MonkeyName = "Joker";
-% protStr = "LocalGlobal_4_4o06_Temp";
+MonkeyName = "Joker";
+protStr = "LocalGlobal_4_4o06_Temp";
 
 MatName = 'chSpkRes_V1.mat';
 run('MonkeyPop_loadData.m');
@@ -83,18 +81,30 @@ stimstrtemp = cellfun(@(x) strsplit(x, '_'), cellstr(trialTypes), 'UniformOutput
 legends = cellfun(@(x) string(x{3}), stimstrtemp);
 PSTHData = []; normPSTH = [];
 
-FigRes = gobjects(1, 2);
 set(0, ...
     'DefaultFigureUnits', 'pixels', ...
     'DefaultFigurePosition', get(0,'ScreenSize'));
+FigRes = gobjects(1, 2);
+colorpool = [
+    0.23 0.30 0.75  % 深蓝（最冷）
+    0.27 0.46 0.82  % 蓝
+    0.30 0.62 0.85  % 蓝青
+    0.35 0.75 0.75  % 青
+    0.60 0.80 0.60  % 青绿（过渡）
+    0.85 0.75 0.45  % 黄橙
+    0.90 0.55 0.30  % 橙
+    0.80 0.25 0.20  % 红（最暖）
+];
 
 for fIdx = 1 : 2
     FigRes(fIdx) = figure('Color','w');
     cellIdx = finalOrder{ControlIdx(fIdx)};
     for gIdx = 1 : size(GroupIdx, 2)
         tIdxs = GroupIdx{gIdx};
+        linecount = 0;
         for tIdx = tIdxs
             mSubplot(RowNum + 1, numel(tIdxs), tIdx, [1, 1], "margins", [0.03, 0.03, 0.06, 0.05]);
+            linecount = linecount + 1;
             plotlatencyIdx = find(ismember(finalOrder{tIdx}, cellIdx));
             plotCellNumIdx = find(ismember(cellIdx, finalOrder{tIdx}));
             % -------- PSTH processing --------
@@ -111,19 +121,20 @@ for fIdx = 1 : 2
             colorbar
             
             hold on
-            plot(sortedLatencies{tIdx}(plotlatencyIdx), plotCellNumIdx, 'r.','markersize',10);
+            plot(sortedLatencies{tIdx}(plotlatencyIdx), plotCellNumIdx, 'r.', 'markersize', 10);
     
             xline(0,'--w','LineWidth',1.5);
-            if tIdx > 7
+            if tIdx > numel(tIdxs)
                 xlabel('Time (ms)');
             end
-            if tIdx == 1 | tIdx == 8
+            if ismember(tIdx, ControlIdx)
                 ylabel('Neuron (sorted by latency)');
             end
             title([char(strrep(trialTypes(tIdx), "_", "-")) ' (n = ' num2str(length(cellIdx)) ')']);        
             set(gca,'fontsize',8,'linewidth',1.2);
         end
         mSubplot(RowNum + 1, size(GroupIdx, 2), 2*size(GroupIdx, 2) + gIdx, [1, 1], "margins", [0.03, 0.03, 0.05, 0.12]);
+        set(gca, 'ColorOrder', colorpool, 'NextPlot', 'replacechildren');
         MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHData(tIdxs), 'UniformOutput', false)');
         plot(tPSTH(plotWinIdx)', MeanPSTH(:, plotWinIdx), 'LineWidth', 2);hold on;
         title(strrep(string(regexpi(trialTypes(ControlIdx(gIdx)), '(\w+ms)', 'tokens')), '_', '-'));
@@ -136,6 +147,6 @@ for fIdx = 1 : 2
         "_PSTHHeatmap_possion.jpg")));
     
 end
-    close all;
+close all;
 
 
