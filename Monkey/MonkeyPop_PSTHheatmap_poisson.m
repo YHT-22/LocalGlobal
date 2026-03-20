@@ -2,18 +2,39 @@
 %  Population PSTH Sorting
 %  Based on Poisson Latency
 %  =========================
-%% -------- load data --------
 ccc;
-protStr = "LocalGlobal_3_3o75_TempSpec";
+%% save Path
+FigRootPath = "G:\Figure\LocalGlobal";
+
+%% -------- load data --------
 DataSetName = "RawPop";
 MonkeyName = "CC";
+protStr = "LocalGlobal_3_3o75_TempSpec";
+
+% MonkeyName = "CM";
+% MonkeyName = "Joker";
+% protStr = "LocalGlobal_4_4o06_Temp";
+
 MatName = 'chSpkRes_V1.mat';
 run('MonkeyPop_loadData.m');
-SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr, MonkeyName);
+SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr);
 mkdir(SavePATH);
+
+%% Delete the cells with inconsistent trial type
+trialTypeNumberAll = rowFcn(@(x) numel(x.spkRes), chResAll);
+DeleteCellIdx = find(trialTypeNumberAll ~= max(trialTypeNumberAll));
+chResAll(DeleteCellIdx) = [];
+
+%% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-ControlIdx = find(contains(trialTypes, "Control"));
-GroupIdx = {1:7, 8:14};
+if strcmp(protStr, "LocalGlobal_3_3o75_TempSpec")
+    GroupIdx = {1:7, 8:14};
+    ControlIdx = find(contains(trialTypes, "Control"));
+elseif strcmp(protStr, "LocalGlobal_4_4o06_Temp")
+    ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
+    GroupIdx = {1:8, 9:16};
+end
+
 
 %% -------- select cell --------
 sigtestRes = arrayfun(@(x) arrayfun(@(y) ttest(y.devCount, y.baseCount, "Alpha",  0.01), x.spkRes), chResAll, 'UniformOutput', false);
@@ -53,7 +74,7 @@ chRes(2).Info = "Possion_SortByDec";
 chRes(2).Data = chResAll_sig(savecellIdx{2});
 chRes(3).Info = "Possion_SortBoth";
 chRes(3).Data = chResAll_sig(savecellIdx_inter);
-save(fullfile(SavePATH, "PopData_SelectByPossion.mat"), "chRes", "tPSTH", '-v7.3');
+save(fullfile(SavePATH, strcat(MonkeyName, "_PopData_SelectByPossion.mat")), "chRes", "tPSTH", '-v7.3');
 
 %% -------- visualization --------
 windowPlot = [-100, 500];
@@ -61,8 +82,14 @@ plotWinIdx = find(tPSTH >= windowPlot(1) & tPSTH <= windowPlot(2));
 stimstrtemp = cellfun(@(x) strsplit(x, '_'), cellstr(trialTypes), 'UniformOutput', false);
 legends = cellfun(@(x) string(x{3}), stimstrtemp);
 PSTHData = []; normPSTH = [];
+
+FigRes = gobjects(1, 2);
+set(0, ...
+    'DefaultFigureUnits', 'pixels', ...
+    'DefaultFigurePosition', get(0,'ScreenSize'));
+
 for fIdx = 1 : 2
-    figure('Color','w','WindowState','maximized');
+    FigRes(fIdx) = figure('Color','w');
     cellIdx = finalOrder{ControlIdx(fIdx)};
     for gIdx = 1 : size(GroupIdx, 2)
         tIdxs = GroupIdx{gIdx};
@@ -86,15 +113,15 @@ for fIdx = 1 : 2
             hold on
             plot(sortedLatencies{tIdx}(plotlatencyIdx), plotCellNumIdx, 'r.','markersize',10);
     
-            xline(0,'--w','LineWidth',1.5)
+            xline(0,'--w','LineWidth',1.5);
             if tIdx > 7
                 xlabel('Time (ms)');
             end
             if tIdx == 1 | tIdx == 8
-                ylabel('Neuron (sorted by latency)')
+                ylabel('Neuron (sorted by latency)');
             end
-            title([char(strrep(trialTypes(tIdx), "_", "-")) ' (n = ' num2str(length(cellIdx)) ')'])        
-            set(gca,'fontsize',8,'linewidth',1.2)
+            title([char(strrep(trialTypes(tIdx), "_", "-")) ' (n = ' num2str(length(cellIdx)) ')']);        
+            set(gca,'fontsize',8,'linewidth',1.2);
         end
         mSubplot(RowNum + 1, size(GroupIdx, 2), 2*size(GroupIdx, 2) + gIdx, [1, 1], "margins", [0.03, 0.03, 0.05, 0.12]);
         MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHData(tIdxs), 'UniformOutput', false)');
@@ -103,4 +130,12 @@ for fIdx = 1 : 2
         legend(legends(tIdxs), "Location", "best");
 
     end
+    %% print figure
+    exportgraphics(FigRes(fIdx), fullfile(SavePATH, strcat(MonkeyName, "_SortBy", ...
+        string(regexpi(trialTypes(ControlIdx(fIdx)), '(\w+ms)', 'tokens')), ...
+        "_PSTHHeatmap_possion.jpg")));
+    
 end
+    close all;
+
+

@@ -2,7 +2,8 @@ ccc;
 cd(fileparts(mfilename('fullpath')));
 
 %% save Path
-FigRootPath = "H:\Figure\LocalGlobal";
+% FigRootPath = "H:\Figure\LocalGlobal";
+FigRootPath = "G:\Figure\LocalGlobal";
 
 %% load data
 DataSetName = "RawPop";
@@ -46,6 +47,10 @@ for gIdx = 1 : numel(GroupIdx)
 end
 
 %% plot PSTH
+set(0, ...
+    'DefaultFigureUnits', 'pixels', ...
+    'DefaultFigurePosition', get(0,'ScreenSize'));
+
 switch MonkeyName
     case "CC"
         yscale = [-1.5, 9.5];
@@ -70,7 +75,7 @@ scaleAxes("x", plotWin);
 scaleAxes("y", yscale);
 
 %% print figure
-print(gcf, fullfile(FigRootPath, protStr, strcat(MonkeyName, "_PSTHRawWave.jpg")), "-djpeg");
+exportgraphics(gcf, fullfile(FigRootPath, protStr, strcat(MonkeyName, "_PSTHRawWave.jpg")));
 close;
 
 
