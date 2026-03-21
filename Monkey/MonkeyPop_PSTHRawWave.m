@@ -50,6 +50,16 @@ end
 set(0, ...
     'DefaultFigureUnits', 'pixels', ...
     'DefaultFigurePosition', get(0,'ScreenSize'));
+colorpool = [
+    0.23 0.30 0.75  % 深蓝（最冷）
+    0.27 0.46 0.82  % 蓝
+    0.30 0.62 0.85  % 蓝青
+    0.35 0.75 0.75  % 青
+    0.60 0.80 0.60  % 青绿（过渡）
+    0.85 0.75 0.45  % 黄橙
+    0.90 0.55 0.30  % 橙
+    0.80 0.25 0.20  % 红（最暖）
+];
 
 switch MonkeyName
     case "CC"
@@ -67,6 +77,7 @@ groupTitles = [unique(cellfun(@(x) string([x{1}, '-', x{2}]), stimstrtemp(GroupI
 legends = cellfun(@(x) string(x{3}), stimstrtemp);
 for gIdx = 1 : numel(GroupIdx)
     subplot(1, 2, gIdx);
+    set(gca, 'ColorOrder', colorpool, 'NextPlot', 'replacechildren');
     plot(tPSTH, y{gIdx, 1}, 'LineWidth', 2);
     title(strcat(MonkeyName, " | ", groupTitles(gIdx), " (n=", num2str(numel(chResAll_sig)), ")"));
     legend(legends(GroupIdx{gIdx}), "Location", "best");

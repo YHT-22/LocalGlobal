@@ -11,7 +11,8 @@ FigRootPath = "E:\Lab members\YHT\Figure\LocalGlobal";
 protStr = "LocalGlobal_3_3o75_TempSpec";
 DataSetName = "RawPop";
 run('Mousepop_loadData.m');
-SavePATH = fullfile(FigRootPath, protStr, "Mice");
+i
+SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 3), "Figure\LocalGlobal", protStr, "Mice");
 mkdir(SavePATH);
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
 ControlIdx = find(contains(trialTypes, "Control"));
@@ -95,21 +96,21 @@ for fIdx = 1 : 2
             imagesc(tPSTH(plotWinIdx),1:length(cellIdx),normPSTH{tIdx}(:, plotWinIdx));
             axis tight
             
-            colormap(jet);
-            colorbar;
+            colormap(jet)
+            colorbar
             
-            hold on;
+            hold on
             plot(sortedLatencies{tIdx}(plotlatencyIdx), plotCellNumIdx, 'r.','markersize',10);
     
             xline(0,'--w','LineWidth',1.5)
-            if tIdx > numel(tIdxs)
+            if tIdx > 7
                 xlabel('Time (ms)');
             end
-            if ismember(tIdx, ControlIdx)
-                ylabel('Neuron (sorted by latency)');
+            if tIdx == 1 | tIdx == 8
+                ylabel('Neuron (sorted by latency)')
             end
-            title([char(strrep(trialTypes(tIdx), "_", "-")) ' (n = ' num2str(length(cellIdx)) ')']);     
-            set(gca,'fontsize',8,'linewidth',1.2);
+            title([char(strrep(trialTypes(tIdx), "_", "-")) ' (n = ' num2str(length(cellIdx)) ')'])        
+            set(gca,'fontsize',8,'linewidth',1.2)
         end
         mSubplot(RowNum + 1, size(GroupIdx, 2), 2*size(GroupIdx, 2) + gIdx, [1, 1], "margins", [0.03, 0.03, 0.05, 0.12]);
         set(gca, 'ColorOrder', colorpool, 'NextPlot', 'replacechildren');
