@@ -3,7 +3,7 @@
 %  Based on Poisson Latency
 %  =========================
 ccc;
-cd(getRootDirPath(mfilename("fullpath"), 3));
+cd(fileparts(mfilename('fullpath')));
 
 %% -------- load data --------
 DataSetName = "RawPop";

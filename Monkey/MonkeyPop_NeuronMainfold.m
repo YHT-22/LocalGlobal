@@ -1,4 +1,5 @@
 ccc;
+cd(fileparts(mfilename('fullpath')));
 
 %% -------- load data --------
 DataSetName = "RawPop";
