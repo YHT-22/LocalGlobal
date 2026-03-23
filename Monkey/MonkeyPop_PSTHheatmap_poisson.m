@@ -6,12 +6,12 @@ ccc;
 
 %% -------- load data --------
 DataSetName = "RawPop";
-% MonkeyName = "CC";
-% protStr = "LocalGlobal_3_3o75_TempSpec";
+MonkeyName = "CC";
+protStr = "LocalGlobal_3_3o75_TempSpec";
 
 % MonkeyName = "CM";
-MonkeyName = "Joker";
-protStr = "LocalGlobal_4_4o06_Temp";
+% MonkeyName = "Joker";
+% protStr = "LocalGlobal_4_4o06_Temp";
 
 MatName = 'chSpkRes_V1.mat';
 run('MonkeyPop_loadData.m');
