@@ -9,8 +9,8 @@ DataSetName = "RawPop";
 % MonkeyName = "CC";
 % protStr = "LocalGlobal_3_3o75_TempSpec";
 
-% MonkeyName = "CM";
-MonkeyName = "Joker";
+MonkeyName = "CM";
+% MonkeyName = "Joker";
 protStr = "LocalGlobal_4_4o06_Temp";
 
 MatName = 'chSpkRes_V1.mat';
@@ -137,13 +137,13 @@ for fIdx = 1 : 2
         set(gca, 'ColorOrder', colorpool, 'NextPlot', 'replacechildren');
         MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHData(tIdxs), 'UniformOutput', false)');
         plot(tPSTH(plotWinIdx)', MeanPSTH(:, plotWinIdx), 'LineWidth', 2);hold on;
-        title(strrep(string(regexpi(trialTypes(ControlIdx(gIdx)), '(\w+ms)', 'tokens')), '_', '-'));
+        title(strrep(string(regexpi(strrep(trialTypes(ControlIdx(gIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-'));
         legend(legends(tIdxs), "Location", "best");
 
     end
     %% print figure
     exportgraphics(FigRes(fIdx), fullfile(SavePATH, strcat(MonkeyName, "_SortBy", ...
-        string(regexpi(trialTypes(ControlIdx(fIdx)), '(\w+ms)', 'tokens')), ...
+        string(regexpi(strrep(trialTypes(ControlIdx(fIdx)), '.', 'o'), '(\w+ms)', 'tokens')), ...
         "_PSTHHeatmap_possion.jpg")));
     
 end
