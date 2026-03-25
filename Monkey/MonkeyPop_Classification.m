@@ -56,7 +56,6 @@ ClassificationtIdx = tPSTH > ClassificationWin(1) & tPSTH < ClassificationWin(2)
 psthMatrixTemp = cellfun(@(x) x(:, ClassificationtIdx), psthMatrixAll(ControlIdx), 'UniformOutput', false);
 featuresMatrix = cell2mat(psthMatrixTemp');
 featuresMatrix_zscore = zscore(featuresMatrix, 0, 2); % 每个神经元内部标准化
-
 [coeff, score, latent, ~, explained] = pca(featuresMatrix_zscore);
 
 % 选解释方差 >80%
@@ -73,11 +72,6 @@ figure;
 for c = 1:k
     subplot(k,1,c); hold on;
     neurons = find(idx0 == c);
-    
-    % for n = neurons'
-    %     plot(featuresMatrix(n,1:size(featuresMatrix, 2)/2), 'r', 'LineStyle','-');   % 条件1
-    %     plot(featuresMatrix(n,size(featuresMatrix, 2)/2+1:end), 'b', 'LineStyle','--');  % 条件2
-    % end
 
     mean1 = mean(featuresMatrix(neurons,1:size(featuresMatrix, 2)/2),1);
     mean2 = mean(featuresMatrix(neurons,size(featuresMatrix, 2)/2+1:end),1);
@@ -93,7 +87,6 @@ bootNum = 1000;
 subFrac = 0.8;
 [Pco, clusterStability, neuronReliability, results] = ...
     bootstrapClusterStability_Subsample(reduced, idx0, k, initReplication, bootNum, subFrac);
-
 %
 figure;
 histogram(neuronReliability, 20);
@@ -112,5 +105,51 @@ removeIdx = neuronReliability < reliabilityThreshold;
 xline(reliabilityThreshold, 'r--', 'LineWidth', 2);
 
 %% 
+idx0tmp = idx0;
+idx0tmp(removeIdx) = 0; 
+[a, b] = sort(idx0tmp);
+ClassifyPSTHMatrix = cellfun(@(psth) cellfun(@(classIdx) psth(b(a == classIdx), :), ...
+                                        num2cell(unique(idx0)), 'UniformOutput', false), ...
+                        psthMatrixTemp, 'UniformOutput', false);
+ClassifyIdx = cellfun(@(classIdx) b(a == classIdx), num2cell(unique(idx0)), 'UniformOutput', false);
 
+RowNum = 2;
+ColNum = 2;
+ylineValues = cellfun(@(x) numel(x), ClassifyIdx);
+legendStr = cellfun(@(x) strcat("Class", string(x)), num2cell(unique(idx0)));
 
+set(0, ...
+    'DefaultFigureUnits', 'pixels', ...
+    'DefaultFigurePosition', get(0,'ScreenSize'));
+FigRes = figure('Color','w');
+for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
+        mSubplot(RowNum, ColNum, tIdx, [1, 1], "margins", [0.03, 0.03, 0.06, 0.05]);
+        % -------- PSTH processing --------
+        % smoothing
+        % sortedPSTH = smoothdata(sortedPSTH,2,'gaussian',5);
+        PSTHDataTemp = ClassifyPSTHMatrix{tIdx};
+        normFactor = max(cell2mat(PSTHDataTemp),[],2);
+        normFactor(normFactor==0) = 1;
+        normPSTH{tIdx} = cell2mat(PSTHDataTemp) ./ normFactor;
+        % -------- PSTH heatmap --------
+        imagesc(tPSTH(ClassificationtIdx),1:size(cell2mat(PSTHDataTemp), 1),normPSTH{tIdx});
+        axis tight;
+        colormap(jet);
+        colorbar
+        hold on
+        h = arrayfun(@(y, num) yline(y, '-', ['n = ', num2str(numel(cell2mat(num)))]), cumsum(ylineValues), ClassifyIdx);
+        set(h, 'Color', 'k', 'LineStyle', '-', 'LineWidth', 4);
+        xline(0,'--w','LineWidth',2);
+        xlabel('Time (ms)');
+        ylabel('Neuron (sorted by category)');
+        title([char(strrep(string(regexpi(strrep(trialTypes(ControlIdx(tIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-')) ...
+            ' (n = ' num2str(size(cell2mat(PSTHDataTemp), 1)) ')']);        
+        set(gca,'fontsize',8,'linewidth',1.2);
+        % -------- PSTH wave --------
+        mSubplot(RowNum, ColNum, tIdx+2, [1, 1], "margins", [0.03, 0.03, 0.05, 0.12]);
+        MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHDataTemp, 'UniformOutput', false));
+        plot(tPSTH(ClassificationtIdx)', MeanPSTH, 'LineWidth', 2);hold on;
+        title(strrep(string(regexpi(strrep(trialTypes(ControlIdx(tIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-'));
+        legend(legendStr, "Location", "best");
+
+end
