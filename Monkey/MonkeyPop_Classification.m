@@ -9,8 +9,8 @@ DataSetName = "RawPop";
 % MonkeyName = "CC";
 % protStr = "LocalGlobal_3_3o75_TempSpec";
 
-MonkeyName = "CM";
-% MonkeyName = "Joker";
+% MonkeyName = "CM";
+MonkeyName = "Joker";
 protStr = "LocalGlobal_4_4o06_Temp";
 
 MatName = 'chSpkRes_V1.mat';
@@ -64,8 +64,8 @@ dim = find(cumvar > 80, 1);
 reduced = score(:,1:dim);
 
 %% k-means
-k = 4; % 可以尝试3~6
-initReplication = 15;
+k = 3; % 可以尝试3~6
+initReplication = 50;
 [idx0, C] = kmeans(reduced, k, 'Replicates', initReplication);
 
 figure;
@@ -88,7 +88,7 @@ subFrac = 0.8;
 [Pco, clusterStability, neuronReliability, results] = ...
     bootstrapClusterStability_Subsample(reduced, idx0, k, initReplication, bootNum, subFrac);
 %
-figure;
+FigRes_kmeans = figure('Color','w');
 histogram(neuronReliability, 20);
 xlabel('Neuron reliability');
 ylabel('Count');
@@ -101,7 +101,6 @@ keepIdx = neuronReliability >= reliabilityThreshold;
 removeIdx = neuronReliability < reliabilityThreshold;
 % methond2: define
 % reliabilityThreshold = 0.6;
-
 xline(reliabilityThreshold, 'r--', 'LineWidth', 2);
 
 %% 
@@ -121,7 +120,7 @@ legendStr = cellfun(@(x) strcat("Class", string(x)), num2cell(unique(idx0)));
 set(0, ...
     'DefaultFigureUnits', 'pixels', ...
     'DefaultFigurePosition', get(0,'ScreenSize'));
-FigRes = figure('Color','w');
+FigRes_Classify = figure('Color','w');
 for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
         mSubplot(RowNum, ColNum, tIdx, [1, 1], "margins", [0.03, 0.03, 0.06, 0.05]);
         % -------- PSTH processing --------
@@ -151,5 +150,8 @@ for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
         plot(tPSTH(ClassificationtIdx)', MeanPSTH, 'LineWidth', 2);hold on;
         title(strrep(string(regexpi(strrep(trialTypes(ControlIdx(tIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-'));
         legend(legendStr, "Location", "best");
-
 end
+ 
+%% print
+exportgraphics(FigRes_Classify, fullfile(SavePATH, strcat(MonkeyName, "_ClassifyRes.jpg")));
+exportgraphics(FigRes_kmeans, fullfile(SavePATH, strcat(MonkeyName, "_Classify_kmeansRes.jpg")));
