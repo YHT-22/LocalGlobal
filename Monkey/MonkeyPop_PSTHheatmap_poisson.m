@@ -3,6 +3,7 @@
 %  Based on Poisson Latency
 %  =========================
 ccc;
+cd(fileparts(mfilename('fullpath')));
 
 %% -------- load data --------
 DataSetName = "RawPop";
@@ -137,13 +138,13 @@ for fIdx = 1 : 2
         set(gca, 'ColorOrder', colorpool, 'NextPlot', 'replacechildren');
         MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHData(tIdxs), 'UniformOutput', false)');
         plot(tPSTH(plotWinIdx)', MeanPSTH(:, plotWinIdx), 'LineWidth', 2);hold on;
-        title(strrep(string(regexpi(trialTypes(ControlIdx(gIdx)), '(\w+ms)', 'tokens')), '_', '-'));
+        title(strrep(string(regexpi(strrep(trialTypes(ControlIdx(gIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-'));
         legend(legends(tIdxs), "Location", "best");
 
     end
     %% print figure
     exportgraphics(FigRes(fIdx), fullfile(SavePATH, strcat(MonkeyName, "_SortBy", ...
-        string(regexpi(trialTypes(ControlIdx(fIdx)), '(\w+ms)', 'tokens')), ...
+        string(regexpi(strrep(trialTypes(ControlIdx(fIdx)), '.', 'o'), '(\w+ms)', 'tokens')), ...
         "_PSTHHeatmap_possion.jpg")));
     
 end
