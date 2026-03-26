@@ -1,7 +1,5 @@
 %% ==========================================
 % MATLAB示例：神经元群体无监督聚类（HDBSCAN）
-% 前提：已下载 HDBSCAN MATLAB 实现并添加路径
-% https://www.mathworks.com/matlabcentral/fileexchange/64864-jorsorokin-hdbscan
 % 输入:
 %   data: n_neurons x n_features
 %   regions: n_neurons x 1 cell array，标记脑区 ('AC','MGB','IC','CN')
@@ -18,6 +16,7 @@ protStr = "LocalGlobal_4_5_Temp";
 
 MatName = 'res.mat';
 run('RatPop_loadData.m');
+
 SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr);
 mkdir(SavePATH);
 
