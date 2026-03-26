@@ -20,7 +20,7 @@ switch DataSetName
     tmp = arrayfun(@(f) load(fullfile(f.folder,f.name), "chSpikeLfp"), fileList);
     cellfun(@(x) char(strjoin([date, strrep(x, "CH", "ID")], "_")), string(fieldnames(trialsSpike)), "uni",false)
     dateinfo = cellfun(@(name) name(end), arrayfun(@(f) strsplit(string(f.folder), "\"), fileList, 'UniformOutput', false));
-    arrayfun(@(x) cellfun(@(ordr) x.chSpikeLfp(ordr), num2cell([1:numel(tmp(1).chSpikeLfp)])), tmp, 'UniformOutput', false);
+    arrayfun(@(x, devordr) cellfun(@(ordr) , num2cell([1:numel(tmp(1).chSpikeLfp)]))x.chSpikeLfp(devordr), tmp, 'UniformOutput', false);
     tPSTH = tmp(1).chSpikeLfp(1).chSPK(1).PSTH(:, 1);
 
 end

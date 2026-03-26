@@ -27,13 +27,8 @@ chResAll(DeleteCellIdx) = [];
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-if strcmp(protStr, "LocalGlobal_3_3o75_TempSpec")
-    GroupIdx = {1:7, 8:14};
-    ControlIdx = find(contains(trialTypes, "Control"));
-elseif strcmp(protStr, "LocalGlobal_4_4o06_Temp")
-    ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
-    GroupIdx = {1:8, 9:16};
-end
+ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
+GroupIdx = {1:8, 9:16};
 
 %% -------- select cell --------
 sigtestRes = arrayfun(@(x) arrayfun(@(y) ttest(y.devCount, y.baseCount, "Alpha",  0.01), x.spkRes), chResAll, 'UniformOutput', false);
