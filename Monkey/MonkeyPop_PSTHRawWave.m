@@ -7,7 +7,8 @@ FigRootPath = "G:\Figure\LocalGlobal";
 
 %% load data
 DataSetName = "RawPop";
-MonkeyName = "CC";
+% MonkeyName = "CC";
+MonkeyName = "Joker";
 protStr = "LocalGlobal_3_3o75_TempSpec";
 
 % MonkeyName = "CM";
@@ -83,7 +84,7 @@ for gIdx = 1 : numel(GroupIdx)
     legend(legends(GroupIdx{gIdx}), "Location", "best");
 end
 scaleAxes("x", plotWin);
-scaleAxes("y", yscale);
+scaleAxes("y", "on");
 
 %% print figure
 exportgraphics(gcf, fullfile(FigRootPath, protStr, strcat(MonkeyName, "_PSTHRawWave.jpg")));

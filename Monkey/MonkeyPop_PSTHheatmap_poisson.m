@@ -7,7 +7,8 @@ cd(fileparts(mfilename('fullpath')));
 
 %% -------- load data --------
 DataSetName = "RawPop";
-MonkeyName = "CC";
+% MonkeyName = "CC";
+MonkeyName = "Joker";
 protStr = "LocalGlobal_3_3o75_TempSpec";
 
 % MonkeyName = "CM";
