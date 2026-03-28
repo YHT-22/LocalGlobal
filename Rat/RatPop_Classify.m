@@ -16,6 +16,7 @@ mkdir(SavePATH);
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
 ControlIdx = find(arrayfun(@(str)contains(str, 'Inf'), trialTypes));
 GroupIdx = {1:8, 9:16};
+Regions = ["AC" , "MGB", "IC", "CN"];
 
 %% -------- select cell --------
 sigtestRes = arrayfun(@(x) arrayfun(@(y) ttest(y.devCount, y.baseCount, "Alpha",  0.01), x.spkRes), chResAll, 'UniformOutput', false);
@@ -86,75 +87,108 @@ end
 exportgraphics(Fig_dendrogram, fullfile(SavePATH, strcat("Rat_Classify_dendrogramRes_c", num2str(clusterNum), ".jpg")));
 
 %% 检验可靠性
-bootNum = 1000;
-subFrac = 0.8;
-clusterParams.classifyMethond = "linkage";
-clusterParams.k = clusterNum;
-[Pco, clusterStability, neuronReliability, results] = ...
-    bootstrapClusterStability_Subsample(reduced, idx0, bootNum, subFrac, clusterParams);
-% neuronReliability distribution
-FigRes_kmeans = figure('Color','w');
-histogram(neuronReliability, 20);
-xlabel('Neuron reliability');
-ylabel('Count');
-title('Neuron reliability distribution');
-xlim([0 1]);
-hold on;
-% methond1: mean - std
-reliabilityThreshold = mean(neuronReliability, 'omitnan') - std(neuronReliability, 'omitnan');
-keepIdx = neuronReliability >= reliabilityThreshold;
-removeIdx = neuronReliability < reliabilityThreshold;
-% methond2: define
-% reliabilityThreshold = 0.6;
-xline(reliabilityThreshold, 'r--', 'LineWidth', 2);
-%% 
+% bootNum = 1000;
+% subFrac = 0.8;
+% clusterParams.classifyMethond = "linkage";
+% clusterParams.k = clusterNum;
+% [Pco, clusterStability, neuronReliability, results] = ...
+%     bootstrapClusterStability_Subsample(reduced, idx0, bootNum, subFrac, clusterParams);
+% % neuronReliability distribution
+% FigRes_kmeans = figure('Color','w');
+% histogram(neuronReliability, 20);
+% xlabel('Neuron reliability');
+% ylabel('Count');
+% title('Neuron reliability distribution');
+% xlim([0 1]);
+% hold on;
+% % methond1: mean - std
+% reliabilityThreshold = mean(neuronReliability, 'omitnan') - std(neuronReliability, 'omitnan');
+% keepIdx = neuronReliability >= reliabilityThreshold;
+% removeIdx = neuronReliability < reliabilityThreshold;
+% % methond2: define
+% % reliabilityThreshold = 0.6;
+% xline(reliabilityThreshold, 'r--', 'LineWidth', 2);
+% 
+%% select cell after reliability test
 idx0tmp = idx0;
-idx0tmp(removeIdx) = 0; 
-[a, b] = sort(idx0tmp);
-ClassifyPSTHMatrix = cellfun(@(psth) cellfun(@(classIdx) psth(b(a == classIdx), :), ...
-                                        num2cell(unique(idx0)), 'UniformOutput', false), ...
-                        psthMatrixTemp, 'UniformOutput', false);
-ClassifyIdx = cellfun(@(classIdx) b(a == classIdx), num2cell(unique(idx0)), 'UniformOutput', false);
+% idx0tmp(removeIdx) = 0; 
+cellclusterInfo = [arrayfun(@(x) string(x.CH), chResAll_sig), idx0tmp];
+run("RatPop_Classify_RegionInfo.m");
 
-RowNum = 2;
-ColNum = 2;
-ylineValues = cellfun(@(x) numel(x), ClassifyIdx);
+%%
+RowNum = 4;
+ColNum = numel(unique(idx0)) + 2;
+AC_ylineValues = cellfun(@(x) numel(x), AC_ClassifyIdx);
+MGB_ylineValues = cellfun(@(x) numel(x), MGB_ClassifyIdx);
+IC_ylineValues = cellfun(@(x) numel(x), IC_ClassifyIdx);
+CN_ylineValues = cellfun(@(x) numel(x), CN_ClassifyIdx);
 legendStr = cellfun(@(x) strcat("Class", string(x)), num2cell(unique(idx0)));
 
 set(0, ...
     'DefaultFigureUnits', 'pixels', ...
     'DefaultFigurePosition', get(0,'ScreenSize'));
 FigRes_Classify = figure('Color','w');
-for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
-        mSubplot(RowNum, ColNum, tIdx, [1, 1], "margins", [0.03, 0.03, 0.06, 0.05]);
+for regionIdx = 1 : numel(Regions)
+    RegionStr = Regions(regionIdx);
+    switch RegionStr
+        case "AC"
+            ClassifyPSTHMatrix = AC_ClassifyPSTHMatrix;
+            ylineValues = AC_ylineValues;
+            ClassifyIdx = AC_ClassifyIdx;
+        case "MGB"
+            ClassifyPSTHMatrix = MGB_ClassifyPSTHMatrix;
+            ylineValues = MGB_ylineValues;
+            ClassifyIdx = MGB_ClassifyIdx;
+        case "IC"
+            ClassifyPSTHMatrix = IC_ClassifyPSTHMatrix;
+            ylineValues = IC_ylineValues;
+            ClassifyIdx = IC_ClassifyIdx;
+        case "CN"
+            ClassifyPSTHMatrix = CN_ClassifyPSTHMatrix;
+            ylineValues = CN_ylineValues;
+            ClassifyIdx = CN_ClassifyIdx;
+    end
+    for cIdx = 1:size(ClassifyPSTHMatrix{1}, 1)
         % -------- PSTH processing --------
         % smoothing
         % sortedPSTH = smoothdata(sortedPSTH,2,'gaussian',5);
+        PSTHDataTemp = cellfun(@(x) mean(x{cIdx}, 1), ClassifyPSTHMatrix, 'UniformOutput', false);  
+        % -------- PSTH wave --------
+        mSubplot(RowNum, ColNum, (regionIdx-1)*ColNum + cIdx, [1, 1], "margins", [0.08, 0.08, 0.1, 0.05]); hold on;
+        plot(tPSTH(ClassificationtIdx), PSTHDataTemp{1}, 'r', 'LineWidth',2);hold on;
+        plot(tPSTH(ClassificationtIdx), PSTHDataTemp{2}, 'b', 'LineWidth',2);
+        title(['Cluster ' num2str(k(cIdx)), ' (n=', num2str(numel(ClassifyIdx{cIdx})), ')']);
+
+    end
+    PSTHDataTemp = [];normPSTH = [];
+    for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
+        % -------- PSTH processing --------     
         PSTHDataTemp = ClassifyPSTHMatrix{tIdx};
-        normFactor = max(cell2mat(PSTHDataTemp),[],2);
-        normFactor(normFactor==0) = 1;
-        normPSTH{tIdx} = cell2mat(PSTHDataTemp) ./ normFactor;
+        normFactor = cellfun(@(x) max(x, [], 2), PSTHDataTemp, 'UniformOutput', false);
+        for c = 1 : size(normFactor, 1)
+            tmp = normFactor{c};
+            tmp(tmp == 0) = 1;
+            normFactor{c} = tmp;
+        end
+        normPSTH{tIdx} = cellfun(@(poppsth, normfac) poppsth ./ normfac, PSTHDataTemp, normFactor, 'uni',false);  
         % -------- PSTH heatmap --------
-        imagesc(tPSTH(ClassificationtIdx),1:size(cell2mat(PSTHDataTemp), 1),normPSTH{tIdx});
+        mSubplot(RowNum, ColNum, (regionIdx - 1) * ColNum + numel(unique(idx0)) + tIdx, [1, 1], "margins", [0.06, 0.06, 0.06, 0.05]);
+        imagesc(tPSTH(ClassificationtIdx),1:size(cell2mat(PSTHDataTemp), 1),cell2mat(normPSTH{tIdx}));
         axis tight;
-        colormap(jet);
-        colorbar
-        hold on
-        h = arrayfun(@(y, num) yline(y, '-', ['n = ', num2str(numel(cell2mat(num)))]), cumsum(ylineValues), ClassifyIdx);
-        set(h, 'Color', 'k', 'LineStyle', '-', 'LineWidth', 4);
+        colormap(jet);colorbar;hold on;
+        h = arrayfun(@(y) yline(y, '-'), cumsum(ylineValues));
+        set(h, 'Color', 'k', 'LineStyle', '-', 'LineWidth', 2);
         xline(0,'--w','LineWidth',2);
         xlabel('Time (ms)');
         ylabel('Neuron (sorted by category)');
-        title([char(strrep(string(regexpi(strrep(trialTypes(ControlIdx(tIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-')) ...
-            ' (n = ' num2str(size(cell2mat(PSTHDataTemp), 1)) ')']);        
+        title([char(trialTypes(ControlIdx(tIdx))),' (n = ', num2str(size(cell2mat(PSTHDataTemp), 1)) ')']);        
         set(gca,'fontsize',8,'linewidth',1.2);
-        % -------- PSTH wave --------
-        mSubplot(RowNum, ColNum, tIdx+2, [1, 1], "margins", [0.03, 0.03, 0.05, 0.12]);
-        MeanPSTH = cell2mat(cellfun(@(x) mean(x, 1), PSTHDataTemp, 'UniformOutput', false));
-        plot(tPSTH(ClassificationtIdx)', MeanPSTH, 'LineWidth', 2);hold on;
-        title(strrep(string(regexpi(strrep(trialTypes(ControlIdx(tIdx)), '.', 'o'), '(\w+ms)', 'tokens')), '_', '-'));
-        legend(legendStr, "Location", "best");
+    end
 end
- 
-% print
-exportgraphics(FigRes_Classify, fullfile(SavePATH, strcat(MonkeyName, "_ClassifyRes.jpg")));
+annotation(FigRes_Classify, "textbox", [.01, .8, .1, .1], "String", "AC", "BackgroundColor", "none", "EdgeColor", "none", "FitBoxToText", "on", "FontSize", 14);
+annotation(FigRes_Classify, "textbox", [.01, .55, .1, .1], "String", "MGB", "BackgroundColor", "none", "EdgeColor", "none", "FitBoxToText", "on", "FontSize", 14);
+annotation(FigRes_Classify, "textbox", [.01, .33, .1, .1], "String", "IC", "BackgroundColor", "none", "EdgeColor", "none", "FitBoxToText", "on", "FontSize", 14);
+annotation(FigRes_Classify, "textbox", [.01, .12, .1, .1], "String", "CN", "BackgroundColor", "none", "EdgeColor", "none", "FitBoxToText", "on", "FontSize", 14);
+
+%% print
+exportgraphics(FigRes_Classify, fullfile(SavePATH, "Rat_ClassifyRes.jpg"));
