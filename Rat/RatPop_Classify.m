@@ -14,7 +14,7 @@ mkdir(SavePATH);
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
+ControlIdx = find(arrayfun(@(str)contains(str, 'Inf'), trialTypes));
 GroupIdx = {1:8, 9:16};
 
 %% -------- select cell --------
@@ -39,22 +39,40 @@ ClassificationtIdx = tPSTH > ClassificationWin(1) & tPSTH < ClassificationWin(2)
 psthMatrixTemp = cellfun(@(x) x(:, ClassificationtIdx), psthMatrixAll(ControlIdx), 'UniformOutput', false);
 featuresMatrix = cell2mat(psthMatrixTemp');
 featuresMatrix_zscore = zscore(featuresMatrix, 0, 2); % 每个神经元内部标准化
-[coeff, score, latent, ~, explained] = pca(featuresMatrix_zscore);
-
+[coeff, score, latent, ~, explained] = pca(featuresMatrix_zscore, 'Algorithm', 'svd');
 % 选解释方差 >80%
 cumvar = cumsum(explained);
 dim = find(cumvar > 80, 1);
 reduced = score(:,1:dim);
 
-%% k-means
-k = 3; % 可以尝试3~6
-initReplication = 50;
-[idx0, C] = kmeans(reduced, k, 'Replicates', initReplication);
+%% 层级聚类
+clusterNum = 7;
+% 计算样本间的距离（可以使用欧几里得距离）
+distances = pdist(reduced);
 
-figure;
-for c = 1:k
-    subplot(k,1,c); hold on;
-    neurons = find(idx0 == c);
+% 使用 'linkage' 进行层级聚类（'average' 是合并方式，可以换成 'single', 'complete' 等）
+Z = linkage(distances, 'ward');
+
+% 绘制树状图
+set(0, ...
+    'DefaultFigureUnits', 'pixels', ...
+    'DefaultFigurePosition', get(0,'ScreenSize'));
+Fig_dendrogram = figure;
+subplot(1,2,1);hold on;
+dendrogram(Z);
+xlabel('Sample Index');
+ylabel('Distance');
+title('Hierarchical Clustering Dendrogram');
+
+% 选择簇
+idx0 = cluster(Z, 'maxclust', clusterNum); 
+s = silhouette(reduced, idx0);
+mean_s = mean(s);
+
+k=unique(idx0);
+for c = 1:clusterNum
+    subplot(numel(k),2,2*c); hold on;
+    neurons = find(idx0 == k(c));
 
     mean1 = mean(featuresMatrix(neurons,1:size(featuresMatrix, 2)/2),1);
     mean2 = mean(featuresMatrix(neurons,size(featuresMatrix, 2)/2+1:end),1);
@@ -62,15 +80,19 @@ for c = 1:k
     plot(tPSTH(ClassificationtIdx), mean1, 'k', 'LineWidth',2);
     plot(tPSTH(ClassificationtIdx), mean2, 'k--', 'LineWidth',2);
     
-    title(['Cluster ' num2str(c)]);
+    title(['Cluster ' num2str(k(c))]);
 end
+% print
+exportgraphics(Fig_dendrogram, fullfile(SavePATH, strcat("Rat_Classify_dendrogramRes_c", num2str(clusterNum), ".jpg")));
 
-%% k-means 检验可靠性
+%% 检验可靠性
 bootNum = 1000;
 subFrac = 0.8;
+clusterParams.classifyMethond = "linkage";
+clusterParams.k = clusterNum;
 [Pco, clusterStability, neuronReliability, results] = ...
-    bootstrapClusterStability_Subsample(reduced, idx0, k, initReplication, bootNum, subFrac);
-%
+    bootstrapClusterStability_Subsample(reduced, idx0, bootNum, subFrac, clusterParams);
+% neuronReliability distribution
 FigRes_kmeans = figure('Color','w');
 histogram(neuronReliability, 20);
 xlabel('Neuron reliability');
@@ -85,7 +107,6 @@ removeIdx = neuronReliability < reliabilityThreshold;
 % methond2: define
 % reliabilityThreshold = 0.6;
 xline(reliabilityThreshold, 'r--', 'LineWidth', 2);
-
 %% 
 idx0tmp = idx0;
 idx0tmp(removeIdx) = 0; 
@@ -135,6 +156,5 @@ for tIdx = 1 : size(ClassifyPSTHMatrix, 1)
         legend(legendStr, "Location", "best");
 end
  
-%% print
+% print
 exportgraphics(FigRes_Classify, fullfile(SavePATH, strcat(MonkeyName, "_ClassifyRes.jpg")));
-exportgraphics(FigRes_kmeans, fullfile(SavePATH, strcat(MonkeyName, "_Classify_kmeansRes.jpg")));

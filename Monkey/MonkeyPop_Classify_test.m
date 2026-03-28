@@ -59,26 +59,41 @@ numPC = find(cumVar >= 80, 1);
 data_pca = score(:, 1:numPC);
 fprintf('PCA降维：保留 %d 个主成分，累积方差 %.2f%%\n', numPC, cumVar(numPC));
 
-%%
+%% 层级聚类
+clusterNum = 6;
 % 计算样本间的距离（可以使用欧几里得距离）
-distances = pdist(data);
+distances = pdist(reduced);
 
 % 使用 'linkage' 进行层级聚类（'average' 是合并方式，可以换成 'single', 'complete' 等）
-Z = linkage(distances, 'average');
+Z = linkage(distances, 'ward');
 
 % 绘制树状图
-figure;
+Fig_dendrogram = figure;
+subplot(1,2,1);hold on;
 dendrogram(Z);
 xlabel('Sample Index');
 ylabel('Distance');
 title('Hierarchical Clustering Dendrogram');
 
-% 选择一个合适的切割高度（例如 y=10）
-T = cluster(Z, 'maxclust', 4);  % 选择 4 个簇
+% 选择簇
+idx0 = cluster(Z, 'maxclust', clusterNum); 
+s = silhouette(reduced, idx0);
+mean_s = mean(s);
 
-% 可视化聚类结果
-figure;
-gscatter(data(:,1), data(:,2), T);  % 假设数据是二维的
-xlabel('Feature 1');
-ylabel('Feature 2');
-title('Hierarchical Clustering Results');
+k=unique(idx0);
+for c = 1:numel(k)
+    subplot(numel(k),2,2*c); hold on;
+    neurons = find(idx0 == k(c));
+
+    mean1 = mean(featuresMatrix(neurons,1:size(featuresMatrix, 2)/2),1);
+    mean2 = mean(featuresMatrix(neurons,size(featuresMatrix, 2)/2+1:end),1);
+    
+    plot(tPSTH(ClassificationtIdx), mean1, 'k', 'LineWidth',2);
+    plot(tPSTH(ClassificationtIdx), mean2, 'k--', 'LineWidth',2);
+    
+    title(['Cluster ' num2str(k(c))]);
+end
+
+exportgraphics(Fig_dendrogram, fullfile(SavePATH, strcat(MonkeyName, "_Classify_dendrogramRes_c", num2str(clusterNum), ".jpg")));
+
+%%

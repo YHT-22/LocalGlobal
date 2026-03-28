@@ -85,9 +85,12 @@ end
 %% k-means 检验可靠性
 bootNum = 1000;
 subFrac = 0.8;
+clusterParams.classifyMethond = "kmeans";
+clusterParams.k = k;
+clusterParams.initReplication = initReplication;
 [Pco, clusterStability, neuronReliability, results] = ...
-    bootstrapClusterStability_Subsample(reduced, idx0, k, initReplication, bootNum, subFrac);
-%
+    bootstrapClusterStability_Subsample(reduced, idx0, bootNum, subFrac, clusterParams);
+% neuronReliability distribution
 FigRes_kmeans = figure('Color','w');
 histogram(neuronReliability, 20);
 xlabel('Neuron reliability');

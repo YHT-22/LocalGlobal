@@ -7,7 +7,7 @@ function [Pco, clusterStability, neuronReliability, results] = ...
 %   idx0            - [N x 1] 原始聚类标签（基于全体神经元得到）
 %   bootNum         - 重采样次数，例如 200
 %   subFrac         - 每次抽样比例，例如 0.8
-%   clusterParams   - 聚类相关参数（classifyMethond(kmeans|linkage) & k, initReplication (kmeans) | k(linkage)）
+%   clusterParams   - 聚类相关参数（kmeans:k, initReplication; linkage:k）
 % 输出：
 %   Pco               - [N x N] 共聚类概率矩阵
 %   clusterStability  - [k x 1] 每个cluster的稳定性
