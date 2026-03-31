@@ -47,7 +47,7 @@ dim = find(cumvar > 80, 1);
 reduced = score(:,1:dim);
 
 %% 层级聚类
-clusterNum = 7;
+clusterNum = 6;
 % 计算样本间的距离（可以使用欧几里得距离）
 distances = pdist(reduced);
 
