@@ -15,7 +15,7 @@ for pIndex = 1 : length(protStr)
         disp(string(date));
         break;
     end
-    trialsSpike{pIndex, 1}   = selectSpike(spikeDataset, trialAll , LocalGlobalParams, "trial onset");
+    trialsSpike{pIndex, 1}   = selectSpike(spikeDataset, trialAll , LocalGlobalParams, "dev onset");
     
     devOrdr{pIndex, 1}       = [trialAll.devOrdr]'+(pIndex - 1)*2;
     stimStrs{pIndex, 1}      = [chSpikeLfp.stimStr]';
@@ -64,6 +64,6 @@ chSpkRes = cell2struct([
 mkdir(SAVEPATH);
 
 params      = collectVarsInWS(["tPSTH", "stimStrs"]);
-save(fullfile(SAVEPATH, "chSpkRes_V1.mat"), "chSpkRes", "params", "winBaseResp", "-v7.3");
+save(fullfile(SAVEPATH, "chSpkRes_devOnset.mat"), "chSpkRes", "params", "winBaseResp", "-v7.3");
 
 end

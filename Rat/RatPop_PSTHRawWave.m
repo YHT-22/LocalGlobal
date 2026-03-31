@@ -1,39 +1,24 @@
+%% ==========================================
 ccc;
 cd(fileparts(mfilename('fullpath')));
 
-%% save Path
-% FigRootPath = "H:\Figure\LocalGlobal";
-FigRootPath = "G:\Figure\LocalGlobal";
-
-%% load data
+%% -------- load data --------
 DataSetName = "RawPop";
-% MonkeyName = "CC";
-MonkeyName = "Joker";
-protStr = "LocalGlobal_3_3o75_TempSpec";
+protStr = "LocalGlobal_4_5_Temp";
 
-% MonkeyName = "CM";
-% MonkeyName = "Joker";
-% protStr = "LocalGlobal_4_4o06_Temp";
+MatName = 'chSpkRes_devOnset.mat';
+run('RatPop_loadData.m');
 
-MatName = 'chSpkRes_V1.mat';
-run('MonkeyPop_loadData.m');
-
-%% Delete the cells with inconsistent trial type
-trialTypeNumberAll = rowFcn(@(x) numel(x.spkRes), chResAll);
-DeleteCellIdx = find(trialTypeNumberAll ~= max(trialTypeNumberAll));
-chResAll(DeleteCellIdx) = [];
+SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr);
+mkdir(SavePATH);
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-if strcmp(protStr, "LocalGlobal_3_3o75_TempSpec")
-    GroupIdx = {1:7, 8:14};
-    ControlIdx = find(contains(trialTypes, "Control"));
-elseif strcmp(protStr, "LocalGlobal_4_4o06_Temp")
-    ControlIdx = find(arrayfun(@(str) ~isempty(regexp(str, 'N\d{3}', 'once')), trialTypes));
-    GroupIdx = {1:8, 9:16};
-end
+ControlIdx = find(arrayfun(@(str)contains(str, 'Inf'), trialTypes));
+GroupIdx = {2:8, 10:16};
+Regions = ["AC" , "MGB", "IC", "CN"];
 
-%% select cell
+%% -------- select cell --------
 sigtestRes = arrayfun(@(x) arrayfun(@(y) ttest(y.devCount, y.baseCount, "Alpha",  0.01), x.spkRes), chResAll, 'UniformOutput', false);
 sigIdx = find(cellfun(@(x) any(x(ControlIdx) == 1), sigtestRes));
 chResAll_sig = chResAll(sigIdx);
@@ -62,14 +47,6 @@ colorpool = [
     0.80 0.25 0.20  % 红（最暖）
 ];
 
-switch MonkeyName
-    case "CC"
-        yscale = [-1.5, 9.5];
-    case "CM"
-        yscale = [-1.5, 11];
-    case "Joker"
-        yscale = [-1.5, 9.5];
-end
 plotWin = [-100, 500];
 tPSTH = tmp(1).params.tPSTH;
 stimstrtemp = cellfun(@(x) strsplit(x, '_'), cellstr(trialTypes), 'UniformOutput', false);

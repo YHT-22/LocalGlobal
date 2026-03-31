@@ -6,7 +6,7 @@ cd(fileparts(mfilename('fullpath')));
 DataSetName = "RawPop";
 protStr = "LocalGlobal_4_5_Temp";
 
-MatName = 'chSpkRes_V1.mat';
+MatName = 'chSpkRes_devOnset.mat';
 run('RatPop_loadData.m');
 
 SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr);
@@ -14,7 +14,7 @@ mkdir(SavePATH);
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-ControlIdx = find(arrayfun(@(str)contains(str, 'Inf'), trialTypes));
+ControlIdx = find(arrayfun(@(str) contains(str, 'Inf'), trialTypes));
 GroupIdx = {1:8, 9:16};
 Regions = ["AC" , "MGB", "IC", "CN"];
 
