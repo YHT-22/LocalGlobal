@@ -6,7 +6,7 @@ cd(fileparts(mfilename('fullpath')));
 DataSetName = "RawPop";
 protStr = "LocalGlobal_4_5_Temp";
 
-MatName = 'chSpkRes_V1.mat';
+MatName = 'chSpkRes_devOnset.mat';
 run('RatPop_loadData.m');
 
 SavePATH = fullfile(getRootDirPath(mfilename("fullpath"), 4), "Figure\LocalGlobal", protStr);
@@ -14,7 +14,7 @@ mkdir(SavePATH);
 
 %% params
 trialTypes = arrayfun(@(x) string(x.stimStr), [chResAll(1).spkRes]);
-ControlIdx = find(arrayfun(@(str)contains(str, 'Inf'), trialTypes));
+ControlIdx = find(arrayfun(@(str) contains(str, 'Inf'), trialTypes));
 GroupIdx = {1:8, 9:16};
 Regions = ["AC" , "MGB", "IC", "CN"];
 
@@ -35,7 +35,7 @@ trialSpkAll = changeCellRowNum(arrayfun(@(neuron) cellfun(@(DevIdx) ...
                                 'UniformOutput', false));
 
 %% PCA
-ClassificationWin = [-100, 300];
+ClassificationWin = [-800, 800];
 ClassificationtIdx = tPSTH > ClassificationWin(1) & tPSTH < ClassificationWin(2);
 psthMatrixTemp = cellfun(@(x) x(:, ClassificationtIdx), psthMatrixAll(ControlIdx), 'UniformOutput', false);
 featuresMatrix = cell2mat(psthMatrixTemp');
@@ -47,7 +47,7 @@ dim = find(cumvar > 80, 1);
 reduced = score(:,1:dim);
 
 %% 层级聚类
-clusterNum = 7;
+clusterNum = 6;
 % 计算样本间的距离（可以使用欧几里得距离）
 distances = pdist(reduced);
 
