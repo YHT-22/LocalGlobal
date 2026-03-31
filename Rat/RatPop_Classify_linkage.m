@@ -35,7 +35,7 @@ trialSpkAll = changeCellRowNum(arrayfun(@(neuron) cellfun(@(DevIdx) ...
                                 'UniformOutput', false));
 
 %% PCA
-ClassificationWin = [-100, 300];
+ClassificationWin = [-800, 800];
 ClassificationtIdx = tPSTH > ClassificationWin(1) & tPSTH < ClassificationWin(2);
 psthMatrixTemp = cellfun(@(x) x(:, ClassificationtIdx), psthMatrixAll(ControlIdx), 'UniformOutput', false);
 featuresMatrix = cell2mat(psthMatrixTemp');
